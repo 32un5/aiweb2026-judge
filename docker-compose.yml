@@ -1,0 +1,29 @@
+# 추상적 판사님 → Oracle E2.1.Micro 운영용 compose
+# 운영 명령:
+#   docker compose up -d --build      # 빌드 + 백그라운드 기동
+#   docker compose logs -f            # 실시간 로그
+#   docker compose down               # 정지·제거
+
+services:
+  judge:
+    build: .
+    image: aiweb2026-judge:latest
+    container_name: aiweb2026-judge
+    restart: unless-stopped
+
+    ports:
+      - "8080:8080"                 # 호스트:컨테이너 (nginx가 80 → 8080으로 프록시)
+
+    env_file:
+      - .env                        # GEMINI_API_KEY (git 제외 / chmod 600)
+
+    # E2.1.Micro 1GB RAM 보호
+    mem_limit: 600m
+    memswap_limit: 1500m
+
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8080/"]
+      interval: 30s
+      timeout: 5s
+      start_period: 90s
+      retries: 3

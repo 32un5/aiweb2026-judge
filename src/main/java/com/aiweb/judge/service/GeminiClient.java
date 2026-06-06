@@ -9,11 +9,10 @@ import java.util.Map;
 @Service
 public class GeminiClient {
 
-    // application.properties의 값을 자동으로 꺼내 넣어줌
-    @Value("${gemini.api.key}")
+    @Value("${GEMINI_API_KEY:}")
     private String apiKey;
 
-    @Value("${gemini.api.model}")
+    @Value("${gemini.api.model:gemini-2.5-flash}")
     private String model;
 
     private final RestClient restClient = RestClient.create();

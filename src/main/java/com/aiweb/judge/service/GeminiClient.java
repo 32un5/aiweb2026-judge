@@ -17,14 +17,10 @@ public class GeminiClient {
 
     private final RestClient restClient = RestClient.create();
 
-    /**
-     * 프롬프트(질문)를 Gemini에 보내고, AI가 쓴 텍스트 답변을 돌려준다.
-     */
     public String ask(String prompt) {
         String url = "https://generativelanguage.googleapis.com/v1beta/models/"
                 + model + ":generateContent?key=" + apiKey;
 
-        // Gemini가 요구하는 요청 형태 (JSON 구조)
         Map<String, Object> body = Map.of(
                 "contents", new Object[]{
                         Map.of("parts", new Object[]{
@@ -33,7 +29,6 @@ public class GeminiClient {
                 }
         );
 
-        // 요청 보내고 응답을 Map으로 받음
         Map<?, ?> response = restClient.post()
                 .uri(url)
                 .header("Content-Type", "application/json")
@@ -41,7 +36,6 @@ public class GeminiClient {
                 .retrieve()
                 .body(Map.class);
 
-        // 응답 JSON에서 실제 답변 텍스트만 꺼냄
         return extractText(response);
     }
 

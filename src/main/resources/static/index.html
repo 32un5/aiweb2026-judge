@@ -22,7 +22,6 @@
         .header h1 { font-size: 1.5rem; font-weight: 800; margin-top: 0.3rem; letter-spacing: -0.02em; }
         .header p { color: var(--gray); font-size: 0.92rem; margin-top: 0.3rem; }
 
-        /* 2단 레이아웃: 왼쪽 입력 / 오른쪽 결과 */
         .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; align-items: start; }
         @media (max-width: 820px) { .layout { grid-template-columns: 1fr; } }
 
@@ -60,7 +59,6 @@
         .dots span:nth-child(2) { animation-delay: 0.2s; } .dots span:nth-child(3) { animation-delay: 0.4s; }
         @keyframes blink { 0%,80%,100% { opacity: 0.3; } 40% { opacity: 1; } }
 
-        /* 오른쪽 결과 */
         .placeholder { text-align: center; color: var(--gray); padding: 3rem 1rem; }
         .placeholder .big { font-size: 2.4rem; opacity: 0.5; }
         .result { display: none; }
@@ -88,7 +86,6 @@
             background: var(--bg); color: #4e5968; font-size: 0.98rem; font-weight: 700; font-family: inherit; cursor: pointer; }
         .again:active { background: var(--line); }
 
-        /* 저장된 판결 목록 */
         .history { margin-top: 1.4rem; }
         .history-head { display: flex; justify-content: space-between; align-items: center; margin: 0 0.3rem 0.7rem; }
         .history-head h2 { font-size: 1rem; font-weight: 800; }
@@ -116,7 +113,6 @@
     </div>
 
     <div class="layout">
-        <!-- 왼쪽: 입력 -->
         <div>
             <div class="col-title">사건 접수</div>
             <div class="card">
@@ -144,17 +140,12 @@
             <button class="submit" id="submitBtn" onclick="judge()">⚖️ 판결 받기</button>
         </div>
 
-        <!-- 오른쪽: 결과 + 기록 -->
         <div>
             <div class="col-title">판결 결과</div>
-
-            <!-- 결과 전 안내 -->
             <div class="card placeholder" id="placeholder">
                 <div class="big">👩‍⚖️</div>
                 <p>왼쪽에 사건을 적고<br>판결 받기를 눌러주세요</p>
             </div>
-
-            <!-- 결과 -->
             <div class="result" id="result">
                 <div class="card verdict-card">
                     <div class="verdict-emoji">👩‍⚖️</div>
@@ -171,7 +162,6 @@
                 <button class="again" onclick="newCase()">다른 사건 판결하기</button>
             </div>
 
-            <!-- 저장된 판결 -->
             <div class="history">
                 <div class="history-head">
                     <h2>📚 지난 판결</h2>

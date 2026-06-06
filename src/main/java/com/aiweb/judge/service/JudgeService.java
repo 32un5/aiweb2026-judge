@@ -11,18 +11,16 @@ public class JudgeService {
     private final GeminiClient geminiClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    // Spring이 GeminiClient를 자동으로 넣어줌 (생성자 주입)
     public JudgeService(GeminiClient geminiClient) {
         this.geminiClient = geminiClient;
     }
 
     public FromJudgeResponse judge(CaseRequest request) {
-        String prompt = buildPrompt(request);     // 1) 판사 지시문 만들기
-        String aiAnswer = geminiClient.ask(prompt); // 2) AI에게 보내고 답 받기
-        return parseAnswer(aiAnswer);              // 3) AI 답(JSON)을 우리 틀에 담기
+        String prompt = buildPrompt(request);
+        String aiAnswer = geminiClient.ask(prompt);
+        return parseAnswer(aiAnswer);
     }
 
-    // 1) AI에게 줄 지시문 — 여기가 판사의 성격을 정하는 부분
     private String buildPrompt(CaseRequest request) {
         return """
             너는 '추상적 판사'다. 연인이나 친구 사이의 다툼을 객관적으로 판단한다.
@@ -61,17 +59,14 @@ public class JudgeService {
         );
     }
 
-    // 3) AI가 준 JSON 문자열을 FromJudgeResponse 객체로 변환
     private FromJudgeResponse parseAnswer(String aiAnswer) {
         try {
-            // 혹시 AI가 ```json ... ``` 으로 감싸서 주면 그것만 벗겨냄
             String cleaned = aiAnswer
                     .replace("```json", "")
                     .replace("```", "")
                     .trim();
             return objectMapper.readValue(cleaned, FromJudgeResponse.class);
         } catch (Exception e) {
-            // 변환 실패 시 에러 내용을 판결문에 담아 돌려줌 (디버깅용)
             return new FromJudgeResponse(
                     "판결을 정리하지 못했습니다.",
                     50, 50,

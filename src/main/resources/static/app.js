@@ -1,10 +1,9 @@
-const STORE_KEY = 'judge-history';   // 브라우저에 저장할 때 쓰는 이름표
+const STORE_KEY = 'judge-history';
 
-// ===== 판결 받기 =====
 async function judge() {
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
-    btn.innerHTML = '판결 중이에요 <span class="dots"><span></span><span></span><span></span></span>';
+    btn.innerHTML = '판결 중이에요~ <span class="dots"><span></span><span></span><span></span></span>';
 
     const payload = {
         title: val('title'), personAName: val('personAName'), personAStory: val('personAStory'),
@@ -19,9 +18,9 @@ async function judge() {
         });
         const d = await res.json();
 
-        showResult(payload, d);   // 화면에 표시
-        saveCase(payload, d);     // 브라우저에 저장
-        renderHistory();          // 목록 갱신
+        showResult(payload, d);
+        saveCase(payload, d);
+        renderHistory();
     } catch (e) {
         alert('판결 중 문제가 생겼어요 😢\n' + e);
     } finally {
@@ -30,7 +29,6 @@ async function judge() {
     }
 }
 
-// ===== 결과를 화면에 그리기 =====
 function showResult(payload, d) {
     document.getElementById('placeholder').style.display = 'none';
     document.getElementById('verdict').textContent = d.verdict;
@@ -38,7 +36,6 @@ function showResult(payload, d) {
     document.getElementById('labelB').textContent = (payload.personBName || 'B') + ' ' + d.faultPercentB + '%';
     document.getElementById('summary').textContent = d.objectiveSummary;
     document.getElementById('advice').textContent = d.advice;
-
     document.getElementById('result').classList.add('show');
     document.getElementById('barA').style.width = '0';
     document.getElementById('barB').style.width = '0';
@@ -48,20 +45,18 @@ function showResult(payload, d) {
     }, 100);
 }
 
-// ===== "다른 사건 판결하기" → 입력칸 비우기 + 결과 숨기기 =====
 function newCase() {
     ['title','personAName','personAStory','personBName','personBStory','context']
-        .forEach(id => document.getElementById(id).value = '');   // 입력칸 비우기
+        .forEach(id => document.getElementById(id).value = '');
     document.getElementById('result').classList.remove('show');
     document.getElementById('placeholder').style.display = 'block';
     document.getElementById('title').focus();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ===== 저장 (localStorage) =====
 function saveCase(payload, d) {
     const list = loadAll();
-    list.unshift({                       // 맨 앞에 추가 (최신이 위로)
+    list.unshift({
         id: Date.now(),
         date: new Date().toLocaleString('ko-KR', { dateStyle: 'medium', timeStyle: 'short' }),
         payload: payload,
@@ -75,7 +70,6 @@ function loadAll() {
     catch (e) { return []; }
 }
 
-// ===== 저장된 판결 목록 그리기 =====
 function renderHistory() {
     const list = loadAll();
     const box = document.getElementById('historyList');
@@ -97,7 +91,6 @@ function renderHistory() {
     `).join('');
 }
 
-// ===== 저장된 판결 다시 열기 =====
 function openCase(id) {
     const item = loadAll().find(x => x.id === id);
     if (!item) return;
@@ -105,7 +98,6 @@ function openCase(id) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ===== 삭제 =====
 function delCase(id) {
     const list = loadAll().filter(x => x.id !== id);
     localStorage.setItem(STORE_KEY, JSON.stringify(list));
@@ -118,14 +110,10 @@ function clearAll() {
     renderHistory();
 }
 
-// ===== 도우미 =====
 function val(id) { return document.getElementById(id).value; }
 
-// 제목에 <,> 같은 특수문자가 있어도 안전하게 표시
 function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, c =>
-        ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-// 페이지 처음 열릴 때 저장된 목록 보여주기
 renderHistory();

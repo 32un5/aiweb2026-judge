@@ -1,0 +1,82 @@
+# 추상적 판사님 CI/CD: GitHub push → Oracle E2.1.Micro 자동 배포
+# Secrets 4개 필요: SSH_HOST, SSH_USER, SSH_KEY, GEMINI_API_KEY
+
+name: Deploy Judge to Oracle
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:                # Actions 탭에서 수동 실행 버튼
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: 1. 리포 체크아웃
+        uses: actions/checkout@v4
+
+      - name: 2. 커밋 정보 표시
+        run: |
+          echo "🚀 배포 커밋: ${{ github.sha }}"
+          echo "👤 트리거: ${{ github.actor }}"
+          echo "📝 메시지: ${{ github.event.head_commit.message }}"
+
+      - name: 3. Oracle 서버에 SSH 접속하여 배포
+        uses: appleboy/ssh-action@v1
+        env:
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}.git
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          timeout: 60s
+          command_timeout: 15m
+          envs: REPO_URL,GEMINI_API_KEY
+          script: |
+            set -e
+            echo "▶ 배포 시작: $(date)"
+            cd /home/ubuntu/judge
+
+            # 첫 배포라 .git이 없으면 자동 초기화
+            if [ ! -d .git ]; then
+              echo "▶ .git 없음 — 첫 배포로 판단하여 git init + remote 등록"
+              git init
+              git remote add origin "$REPO_URL"
+            fi
+
+            echo "▶ 최신 코드 pull"
+            git fetch origin main
+            git reset --hard origin/main
+
+            # .env 파일을 GitHub Secret 값으로 매번 새로 씀
+            echo "GEMINI_API_KEY=$GEMINI_API_KEY" > .env
+            chmod 600 .env
+
+            echo "▶ 새 이미지 빌드 + 컨테이너 재기동"
+            docker compose up -d --build
+
+            echo "▶ 헬스체크 대기 (최대 120초 — Java는 부팅이 느림)"
+            for i in {1..24}; do
+              if curl -fsS -o /dev/null http://127.0.0.1:8080/; then
+                echo "✅ 컨테이너 응답 확인"
+                break
+              fi
+              echo "  ... 대기 중 ($i/24)"
+              sleep 5
+            done
+
+            echo "▶ 최종 상태"
+            docker ps --filter "name=aiweb2026-judge" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+            echo "✅ 배포 완료: $(date)"
+
+      - name: 4. 배포 실패 시 안내
+        if: failure()
+        run: |
+          echo "❌ 배포 실패. 서버에서 로그 확인:"
+          echo "  ssh ubuntu@${{ secrets.SSH_HOST }}"
+          echo "  cd /home/ubuntu/judge && docker compose logs --tail=100"

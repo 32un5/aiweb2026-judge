@@ -6,7 +6,7 @@ let evidenceTexts = [];
 async function judge() {
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
-    btn.innerHTML = '판결 중이에요 <span class="dots"><span></span><span></span><span></span></span>';
+    btn.innerHTML = '짐이 헤아리는 중이니라 <span class="dots"><span></span><span></span><span></span></span>';
 
     let fullContext = val('context');
     if (evidenceTexts.length > 0) {
@@ -38,7 +38,7 @@ async function judge() {
         alert('판결 중 문제가 생겼어요 😢\n' + e);
     } finally {
         btn.disabled = false;
-        btn.innerHTML = '⚖️ 판결 받기';
+        btn.innerHTML = '⚖️ 판결을 청하라';
     }
 }
 

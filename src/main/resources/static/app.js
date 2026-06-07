@@ -6,7 +6,7 @@ let evidenceTexts = [];
 async function judge() {
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
-    btn.innerHTML = '판결 중이에요~ <span class="dots"><span></span><span></span><span></span></span>';
+    btn.innerHTML = '판결 중이에요 <span class="dots"><span></span><span></span><span></span></span>';
 
     let fullContext = val('context');
     if (evidenceTexts.length > 0) {
@@ -98,7 +98,7 @@ function removeEvidence(type, i) {
 
 function showResult(payload, d) {
     document.getElementById('placeholder').style.display = 'none';
-    document.getElementById('verdict').textContent = d.verdict;
+    document.getElementById('verdict').textContent = d.result;
     document.getElementById('labelA').textContent = (payload.personAName || 'A') + ' ' + d.faultPercentA + '%';
     document.getElementById('labelB').textContent = (payload.personBName || 'B') + ' ' + d.faultPercentB + '%';
     document.getElementById('summary').textContent = d.objectiveSummary;

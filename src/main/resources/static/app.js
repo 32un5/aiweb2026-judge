@@ -1,13 +1,26 @@
 const STORE_KEY = 'judge-history';
 
+let evidenceImages = [];
+let evidenceTexts = [];
+
 async function judge() {
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
     btn.innerHTML = '판결 중이에요~ <span class="dots"><span></span><span></span><span></span></span>';
 
+    let fullContext = val('context');
+    if (evidenceTexts.length > 0) {
+        fullContext += '\n\n[첨부된 대화/텍스트 파일]\n' + evidenceTexts.map(t => `--- ${t.name} ---\n${t.content}`).join('\n\n');
+    }
+
     const payload = {
-        title: val('title'), personAName: val('personAName'), personAStory: val('personAStory'),
-        personBName: val('personBName'), personBStory: val('personBStory'), context: val('context')
+        title: val('title'),
+        personAName: val('personAName'),
+        personAStory: val('personAStory'),
+        personBName: val('personBName'),
+        personBStory: val('personBStory'),
+        context: fullContext,
+        images: evidenceImages.map(img => ({ mimeType: img.mimeType, data: img.data }))
     };
 
     try {
@@ -29,6 +42,60 @@ async function judge() {
     }
 }
 
+function handleFiles(fileList) {
+    for (const file of fileList) {
+        if (file.type.startsWith('image/')) {
+            if (file.size > 4 * 1024 * 1024) {
+                alert(`${file.name}은(는) 너무 커요 (4MB 이하만). 건너뜁니다.`);
+                continue;
+            }
+            const reader = new FileReader();
+            reader.onload = e => {
+                const base64 = e.target.result.split(',')[1];
+                evidenceImages.push({ name: file.name, mimeType: file.type, data: base64, preview: e.target.result });
+                renderEvidence();
+            };
+            reader.readAsDataURL(file);
+        } else {
+            const reader = new FileReader();
+            reader.onload = e => {
+                let text = e.target.result;
+                const LIMIT = 8000;
+                if (text.length > LIMIT) text = text.slice(0, LIMIT) + '\n...(이하 생략)';
+                evidenceTexts.push({ name: file.name, content: text });
+                renderEvidence();
+            };
+            reader.readAsText(file);
+        }
+    }
+    document.getElementById('evidenceFiles').value = '';
+}
+
+function renderEvidence() {
+    const box = document.getElementById('evidenceList');
+    box.innerHTML = '';
+    evidenceImages.forEach((img, i) => {
+        const el = document.createElement('div');
+        el.className = 'ev-item';
+        el.innerHTML = `<img src="${img.preview}" alt=""><span>${escapeHtml(img.name)}</span>
+            <span class="x" onclick="removeEvidence('img', ${i})">✕</span>`;
+        box.appendChild(el);
+    });
+    evidenceTexts.forEach((t, i) => {
+        const el = document.createElement('div');
+        el.className = 'ev-item';
+        el.innerHTML = `<span>📄 ${escapeHtml(t.name)}</span>
+            <span class="x" onclick="removeEvidence('txt', ${i})">✕</span>`;
+        box.appendChild(el);
+    });
+}
+
+function removeEvidence(type, i) {
+    if (type === 'img') evidenceImages.splice(i, 1);
+    else evidenceTexts.splice(i, 1);
+    renderEvidence();
+}
+
 function showResult(payload, d) {
     document.getElementById('placeholder').style.display = 'none';
     document.getElementById('verdict').textContent = d.verdict;
@@ -48,6 +115,9 @@ function showResult(payload, d) {
 function newCase() {
     ['title','personAName','personAStory','personBName','personBStory','context']
         .forEach(id => document.getElementById(id).value = '');
+    evidenceImages = [];
+    evidenceTexts = [];
+    renderEvidence();
     document.getElementById('result').classList.remove('show');
     document.getElementById('placeholder').style.display = 'block';
     document.getElementById('title').focus();
@@ -56,13 +126,19 @@ function newCase() {
 
 function saveCase(payload, d) {
     const list = loadAll();
+    const lightPayload = { ...payload, images: [] };
     list.unshift({
         id: Date.now(),
         date: new Date().toLocaleString('ko-KR', { dateStyle: 'medium', timeStyle: 'short' }),
-        payload: payload,
+        payload: lightPayload,
         result: d
     });
-    localStorage.setItem(STORE_KEY, JSON.stringify(list));
+    try {
+        localStorage.setItem(STORE_KEY, JSON.stringify(list));
+    } catch (e) {
+        list.pop();
+        localStorage.setItem(STORE_KEY, JSON.stringify(list));
+    }
 }
 
 function loadAll() {

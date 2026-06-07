@@ -101,6 +101,11 @@
         .hist-item .ratio { font-size: 0.82rem; font-weight: 800; color: #4e5968; flex-shrink: 0; margin-left: 0.8rem; }
         .hist-del { border: none; background: none; color: #c4cad2; font-size: 1.1rem; cursor: pointer; padding: 0 0.2rem; }
         .hist-empty { color: var(--gray); font-size: 0.9rem; text-align: center; padding: 1.5rem; }
+        .ev-item { display:flex; align-items:center; gap:0.4rem; background:var(--bg);
+            border-radius:10px; padding:0.4rem 0.6rem; font-size:0.82rem; }
+        .ev-item img { width:34px; height:34px; object-fit:cover; border-radius:6px; }
+        .ev-item .x { cursor:pointer; color:var(--gray); font-weight:700; padding:0 0.2rem; }
+        .ev-item .x:hover { color:var(--red); }
     </style>
 </head>
 <body>
@@ -135,6 +140,14 @@
                 <div class="field">
                     <label>증거 · 맥락 (선택)</label>
                     <textarea id="context" placeholder="카톡 내용, 당시 상황 같은 거 있으면"></textarea>
+                </div>
+                <div class="field">
+                    <label>증거 파일 (이미지·카톡 .txt, 선택)</label>
+                    <input type="file" id="evidenceFiles" multiple
+                           accept="image/*,.txt"
+                           onchange="handleFiles(this.files)"
+                           style="font-size:0.9rem;">
+                    <div id="evidenceList" style="margin-top:0.6rem; display:flex; flex-wrap:wrap; gap:0.5rem;"></div>
                 </div>
             </div>
             <button class="submit" id="submitBtn" onclick="judge()">⚖️ 판결 받기</button>

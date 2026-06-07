@@ -17,15 +17,21 @@ public class GeminiClient {
 
     private final RestClient restClient = RestClient.create();
 
-    public String ask(String prompt) {
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/"
-                + model + ":generateContent?key=" + apiKey;
+    public String ask(String prompt, java.util.List<com.aiweb.judge.dto.CaseRequest.EvidenceImage> images) {
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + apiKey;
+
+        java.util.List<Object> parts = new java.util.ArrayList<>();
+        parts.add(java.util.Map.of("text", prompt));
+
+        if (images != null) {
+            for (var img : images) {
+                parts.add(java.util.Map.of("inline_data", java.util.Map.of("mime_type", img.mimeType(), "data", img.data())));
+            }
+        }
 
         Map<String, Object> body = Map.of(
                 "contents", new Object[]{
-                        Map.of("parts", new Object[]{
-                                Map.of("text", prompt)
-                        })
+                        Map.of("parts", parts.toArray())
                 }
         );
 

@@ -17,7 +17,7 @@ public class JudgeService {
 
     public FromJudgeResponse judge(CaseRequest request) {
         String prompt = buildPrompt(request);
-        String aiAnswer = geminiClient.ask(prompt);
+        String aiAnswer = geminiClient.ask(prompt, request.images());
         return parseAnswer(aiAnswer);
     }
 
@@ -38,6 +38,9 @@ public class JudgeService {
 
             [추가 맥락/증거]
             %s
+
+            첨부된 이미지가 있다면 그것도 중요한 증거다. 카카오톡 대화 캡처라면 누가 어떤 말을 했는지 읽고,
+            사진이라면 상황을 파악해서 판결에 반영하라. 이미지 속 내용과 양측 주장이 다르면 그 점도 지적하라.
 
             위 내용을 바탕으로 판결하라.
             반드시 아래 JSON 형식으로만 답하라. 다른 설명, 인사말, 코드블록 표시(```)는 절대 붙이지 마라.

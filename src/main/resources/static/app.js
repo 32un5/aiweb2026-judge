@@ -35,7 +35,7 @@ async function judge() {
         saveCase(payload, d);
         renderHistory();
     } catch (e) {
-        alert('판결 중 문제가 생겼어요 😢\n' + e);
+        alert('판결 중 문제가 생겼느니라 😢\n' + e);
     } finally {
         btn.disabled = false;
         btn.innerHTML = '⚖️ 판결을 청하라';
@@ -46,7 +46,7 @@ function handleFiles(fileList) {
     for (const file of fileList) {
         if (file.type.startsWith('image/')) {
             if (file.size > 4 * 1024 * 1024) {
-                alert(`${file.name}은(는) 너무 커요 (4MB 이하만). 건너뜁니다.`);
+                alert(`${file.name}은(는) 너무 크도다 (4MB 이하만 받느니라). 물리거라.`);
                 continue;
             }
             const reader = new FileReader();
@@ -151,7 +151,7 @@ function renderHistory() {
     const box = document.getElementById('historyList');
 
     if (list.length === 0) {
-        box.innerHTML = '<div class="hist-empty">아직 저장된 판결이 없어요</div>';
+        box.innerHTML = '<div class="hist-empty">아직 판결한 사건이 없느니라</div>';
         return;
     }
 
@@ -181,7 +181,7 @@ function delCase(id) {
 }
 
 function clearAll() {
-    if (!confirm('저장된 판결을 모두 지울까요?')) return;
+    if (!confirm('지난 판결을 모두 거두랴?')) return;
     localStorage.removeItem(STORE_KEY);
     renderHistory();
 }

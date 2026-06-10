@@ -231,9 +231,15 @@ function escapeHtml(s) {
 function showOnly(id) {
     ['chooseArea', 'evidenceArea', 'inputArea', 'resultArea'].forEach(x => {
         const el = document.getElementById(x);
-        if (el) el.style.display = (x === id) ? 'block' : 'none';
+        if (!el) return;
+        if (x === id) {
+            el.style.display = (x === 'chooseArea') ? 'flex' : 'block';
+        } else {
+            el.style.display = 'none';
+        }
     });
 }
+
 function goHome() {
     ['title','personAName','personAStory','personBName','personBStory','context']
         .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });

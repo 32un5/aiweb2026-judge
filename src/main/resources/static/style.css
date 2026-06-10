@@ -84,7 +84,7 @@ textarea { min-height: 72px; resize: vertical; line-height: 1.7; }
     letter-spacing: 0.04em; transition: border-color 0.15s, color 0.15s;
 }
 .again:hover { border-color: var(--gold); color: var(--gold-soft); }
-.history { margin-top: 1.6rem; }
+.history { margin-top: 3rem !important; }
 .history-head { display: flex; justify-content: space-between; align-items: center; margin: 0 0 0.8rem; }
 .history-head h2 { font-size: 1.2rem; font-weight: 400; color: var(--gold-soft); letter-spacing: 0.06em; }
 .history-head button { border: none; background: none; color: var(--muted); font-size: 0.95rem; cursor: pointer; font-family: var(--font); }
@@ -148,3 +148,4 @@ textarea { min-height: 72px; resize: vertical; line-height: 1.7; }
 @media (max-width: 480px) {
     .choose { flex-direction: column; }
 }
+#chooseArea { max-width: 600px; margin: 0 auto; }

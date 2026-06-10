@@ -16,7 +16,7 @@ public class JudgeApplication {
     public void onReady() {
         System.out.println();
         System.out.println("===========================================");
-        System.out.println("추상적 판사님 준비 완료! 접속해보셈");
+        System.out.println("궁예 준비끝끝끝>>>>> 접속해보셈");
         System.out.println(">>>> http://localhost:8080");
         System.out.println("===========================================");
         System.out.println();

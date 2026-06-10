@@ -4,9 +4,9 @@ let evidenceImages = [];
 let evidenceTexts = [];
 
 async function judge() {
+    showLoading('짐이 헤아리는 중이니라...');
     const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.innerHTML = '짐이 헤아리는 중이니라 <span class="dots"><span></span><span></span><span></span></span>';
+    if (btn) btn.disabled = true;
 
     let fullContext = val('context');
     if (evidenceTexts.length > 0) {
@@ -37,26 +37,30 @@ async function judge() {
     } catch (e) {
         alert('판결 중 문제가 생겼느니라 😢\n' + e);
     } finally {
-        btn.disabled = false;
-        btn.innerHTML = '⚖️ 판결을 청하라';
+        if (btn) btn.disabled = false;
+        hideLoading();
     }
 }
 
 function handleFiles(fileList) {
+    let pending = 0;
     for (const file of fileList) {
         if (file.type.startsWith('image/')) {
             if (file.size > 4 * 1024 * 1024) {
                 alert(`${file.name}은(는) 너무 크도다 (4MB 이하만 받느니라). 물리거라.`);
                 continue;
             }
+            pending++;
             const reader = new FileReader();
             reader.onload = e => {
                 const base64 = e.target.result.split(',')[1];
                 evidenceImages.push({ name: file.name, mimeType: file.type, data: base64, preview: e.target.result });
                 renderEvidence();
+                if (--pending === 0) autoFill();
             };
             reader.readAsDataURL(file);
         } else {
+            pending++;
             const reader = new FileReader();
             reader.onload = e => {
                 let text = e.target.result;
@@ -64,29 +68,73 @@ function handleFiles(fileList) {
                 if (text.length > LIMIT) text = text.slice(0, LIMIT) + '\n...(이하 생략)';
                 evidenceTexts.push({ name: file.name, content: text });
                 renderEvidence();
+                if (--pending === 0) autoFill();
             };
             reader.readAsText(file);
         }
     }
-    document.getElementById('evidenceFiles').value = '';
+    ['evidenceFiles', 'evidenceFiles2'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+}
+
+async function autoFill() {
+    if (evidenceTexts.length === 0 && evidenceImages.length === 0) return;
+
+    showLoading('짐이 증좌를 살피는 중이니라...');
+
+    const chatText = evidenceTexts.map(t => `--- ${t.name} ---\n${t.content}`).join('\n\n');
+    const payload = {
+        context: chatText,
+        images: evidenceImages.map(img => ({ mimeType: img.mimeType, data: img.data }))
+    };
+
+    try {
+        const res = await fetch('/api/extract', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const d = await res.json();
+        fillIfEmpty('title', d.title);
+        fillIfEmpty('personAName', d.personAName);
+        fillIfEmpty('personAStory', d.personAStory);
+        fillIfEmpty('personBName', d.personBName);
+        fillIfEmpty('personBStory', d.personBStory);
+        await judge();
+    } catch (e) {
+        hideLoading();
+        alert('증좌를 살피지 못하였느니라 😢\n' + e);
+    }
+}
+
+function fillIfEmpty(id, value) {
+    const el = document.getElementById(id);
+    if (el && value && el.value.trim() === '') {
+        el.value = value;
+    }
 }
 
 function renderEvidence() {
-    const box = document.getElementById('evidenceList');
-    box.innerHTML = '';
-    evidenceImages.forEach((img, i) => {
-        const el = document.createElement('div');
-        el.className = 'ev-item';
-        el.innerHTML = `<img src="${img.preview}" alt=""><span>${escapeHtml(img.name)}</span>
-            <span class="x" onclick="removeEvidence('img', ${i})">✕</span>`;
-        box.appendChild(el);
-    });
-    evidenceTexts.forEach((t, i) => {
-        const el = document.createElement('div');
-        el.className = 'ev-item';
-        el.innerHTML = `<span>📄 ${escapeHtml(t.name)}</span>
-            <span class="x" onclick="removeEvidence('txt', ${i})">✕</span>`;
-        box.appendChild(el);
+    ['evidenceList', 'evidenceList2'].forEach(boxId => {
+        const box = document.getElementById(boxId);
+        if (!box) return;
+        box.innerHTML = '';
+        evidenceImages.forEach((img, i) => {
+            const el = document.createElement('div');
+            el.className = 'ev-item';
+            el.innerHTML = `<img src="${img.preview}" alt=""><span>${escapeHtml(img.name)}</span>
+                <span class="x" onclick="removeEvidence('img', ${i})">✕</span>`;
+            box.appendChild(el);
+        });
+        evidenceTexts.forEach((t, i) => {
+            const el = document.createElement('div');
+            el.className = 'ev-item';
+            el.innerHTML = `<span>📄 ${escapeHtml(t.name)}</span>
+                <span class="x" onclick="removeEvidence('txt', ${i})">✕</span>`;
+            box.appendChild(el);
+        });
     });
 }
 
@@ -97,7 +145,7 @@ function removeEvidence(type, i) {
 }
 
 function showResult(payload, d) {
-    document.getElementById('placeholder').style.display = 'none';
+    showOnly('resultArea');
     document.getElementById('verdict').textContent = d.result;
     document.getElementById('labelA').textContent = (payload.personAName || 'A') + ' ' + d.faultPercentA + '%';
     document.getElementById('labelB').textContent = (payload.personBName || 'B') + ' ' + d.faultPercentB + '%';
@@ -110,18 +158,6 @@ function showResult(payload, d) {
         document.getElementById('barA').style.width = d.faultPercentA + '%';
         document.getElementById('barB').style.width = d.faultPercentB + '%';
     }, 100);
-}
-
-function newCase() {
-    ['title','personAName','personAStory','personBName','personBStory','context']
-        .forEach(id => document.getElementById(id).value = '');
-    evidenceImages = [];
-    evidenceTexts = [];
-    renderEvidence();
-    document.getElementById('result').classList.remove('show');
-    document.getElementById('placeholder').style.display = 'block';
-    document.getElementById('title').focus();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function saveCase(payload, d) {
@@ -192,4 +228,32 @@ function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
+function showOnly(id) {
+    ['chooseArea', 'evidenceArea', 'inputArea', 'resultArea'].forEach(x => {
+        const el = document.getElementById(x);
+        if (el) el.style.display = (x === id) ? 'block' : 'none';
+    });
+}
+function goHome() {
+    ['title','personAName','personAStory','personBName','personBStory','context']
+        .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    evidenceImages = [];
+    evidenceTexts = [];
+    renderEvidence();
+    showOnly('chooseArea');
+}
+function goManual()   { showOnly('inputArea'); }
+function goEvidence() { showOnly('evidenceArea'); }
+
 renderHistory();
+showOnly('chooseArea');
+
+function showLoading(msg) {
+    const o = document.getElementById('loadingOverlay');
+    const t = o.querySelector('.loading-text');
+    if (t && msg) t.textContent = msg;
+    o.classList.add('show');
+}
+function hideLoading() {
+    document.getElementById('loadingOverlay').classList.remove('show');
+}

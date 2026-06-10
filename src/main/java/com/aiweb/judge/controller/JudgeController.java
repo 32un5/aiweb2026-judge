@@ -1,5 +1,6 @@
 package com.aiweb.judge.controller;
 
+import com.aiweb.judge.dto.AutoCaseResponse;
 import com.aiweb.judge.dto.CaseRequest;
 import com.aiweb.judge.dto.FromJudgeResponse;
 import com.aiweb.judge.service.JudgeService;
@@ -19,5 +20,10 @@ public class JudgeController {
     @PostMapping("/api/judge")
     public FromJudgeResponse judge(@RequestBody CaseRequest request) {
         return judgeService.judge(request);
+    }
+
+    @PostMapping("/api/extract")
+    public AutoCaseResponse extract(@RequestBody CaseRequest request) {
+        return judgeService.extract(request.context(), request.images());
     }
 }

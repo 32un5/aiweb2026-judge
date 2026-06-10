@@ -1,5 +1,6 @@
 package com.aiweb.judge.service;
 
+import com.aiweb.judge.dto.AutoCaseResponse;
 import com.aiweb.judge.dto.CaseRequest;
 import com.aiweb.judge.dto.FromJudgeResponse;
 import tools.jackson.databind.ObjectMapper;
@@ -83,4 +84,46 @@ public class JudgeService {
             );
         }
     }
+
+    public AutoCaseResponse extract(String chatText, java.util.List<com.aiweb.judge.dto.CaseRequest.EvidenceImage> images) {
+        String prompt = buildExtractPrompt(chatText);
+        String aiAnswer = geminiClient.ask(prompt, images);
+        return parseExtract(aiAnswer);
+    }
+
+    private String buildExtractPrompt(String chatText) {
+        return """
+            너는 대화 분석가다. 아래는 두 사람이 다툰 카카오톡 대화다.
+            (텍스트가 비어 있으면 첨부된 이미지가 그 대화 캡처다.)
+            이 대화를 읽고 다음을 추출하라.
+
+            - title: 이 다툼을 한 줄로 요약한 사건 제목 (예: "데이트 약속 펑크 사건")
+            - personAName: 대화에 나오는 첫 번째 사람의 이름(또는 화자명)
+            - personAStory: A의 입장과 주장을 대화에 근거해 2~4문장으로 정리
+            - personBName: 두 번째 사람의 이름(또는 화자명)
+            - personBStory: B의 입장과 주장을 대화에 근거해 2~4문장으로 정리
+
+            [카카오톡 대화]
+            %s
+
+            반드시 아래 JSON 형식으로만 답하라. 다른 설명, 코드블록 표시(```)는 절대 붙이지 마라.
+            {
+              "title": "...",
+              "personAName": "...",
+              "personAStory": "...",
+              "personBName": "...",
+              "personBStory": "..."
+            }
+            """.formatted(chatText == null ? "" : chatText);
+    }
+
+    private AutoCaseResponse parseExtract(String aiAnswer) {
+        try {
+            String cleaned = aiAnswer.replace("```json", "").replace("```", "").trim();
+            return objectMapper.readValue(cleaned, AutoCaseResponse.class);
+        } catch (Exception e) {
+            return new AutoCaseResponse("", "", "", "", "");
+        }
+    }
+
 }

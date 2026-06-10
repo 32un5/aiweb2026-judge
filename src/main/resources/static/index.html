@@ -15,6 +15,7 @@
 </div>
 
 <div class="app">
+    <button class="history-fab" onclick="goHistory()">📜 지난 판결</button>
     <div class="header">
         <div class="mascot"><img src="/judge-mascot.svg" alt="판사" width="90"></div>
         <h1>마구니 감별사</h1>
@@ -91,7 +92,8 @@
         </div>
     </div>
 
-    <div class="history single">
+    <div id="historyArea" class="single" style="display:none;">
+        <button class="back-btn" onclick="goHome()">← 처음으로</button>
         <div class="history-head">
             <h2>📜 지난 판결</h2>
             <button onclick="clearAll()">모두 거두라</button>

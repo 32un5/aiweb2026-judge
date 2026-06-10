@@ -229,7 +229,7 @@ function escapeHtml(s) {
 }
 
 function showOnly(id) {
-    ['chooseArea', 'evidenceArea', 'inputArea', 'resultArea'].forEach(x => {
+    ['chooseArea', 'evidenceArea', 'inputArea', 'resultArea', 'historyArea'].forEach(x => {
         const el = document.getElementById(x);
         if (!el) return;
         if (x === id) {
@@ -238,6 +238,11 @@ function showOnly(id) {
             el.style.display = 'none';
         }
     });
+}
+
+function goHistory() {
+    renderHistory();
+    showOnly('historyArea');
 }
 
 function goHome() {

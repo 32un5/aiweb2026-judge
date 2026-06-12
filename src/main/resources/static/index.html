@@ -34,7 +34,7 @@
             <img src="/sangsomoon.png" alt="상소문" class="scroll-img">
             <div class="scroll-upload">
                 <p class="scroll-guide">다툰 카톡 대화를 올리라<br>(.txt 또는 캡처 이미지)</p>
-                <input type="file" id="evidenceFiles2" multiple accept="image/*,.txt" onchange="handleFiles(this.files)" class="file-input">
+                <input type="file" id="evidenceFiles2" multiple accept="image/*,.txt" onchange="handleFiles(this.files, true)" class="file-input">
                 <div id="evidenceList2" class="evidence-list"></div>
             </div>
         </div>
@@ -71,7 +71,7 @@
             </div>
             <div class="field">
                 <label>증좌를 올리라 (선택)</label>
-                <input type="file" id="evidenceFiles" multiple accept="image/*,.txt" onchange="handleFiles(this.files)" class="file-input">
+                <input type="file" id="evidenceFiles" multiple accept="image/*,.txt" onchange="handleFiles(this.files, false)" class="file-input">
                 <div id="evidenceList" class="evidence-list"></div>
             </div>
             <div class="field">

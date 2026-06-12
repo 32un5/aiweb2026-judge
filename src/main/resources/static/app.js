@@ -44,8 +44,10 @@ async function judge() {
     }
 }
 
-function handleFiles(fileList) {
+function handleFiles(fileList, isAuto = false) {
     let pending = 0;
+    if (fileList.length === 0) return;
+
     for (const file of fileList) {
         if (file.type.startsWith('image/')) {
             if (file.size > 4 * 1024 * 1024) {
@@ -58,7 +60,7 @@ function handleFiles(fileList) {
                 const base64 = e.target.result.split(',')[1];
                 evidenceImages.push({ name: file.name, mimeType: file.type, data: base64, preview: e.target.result });
                 renderEvidence();
-                if (--pending === 0) autoFill();
+                if (--pending === 0 && isAuto) autoFill();
             };
             reader.readAsDataURL(file);
         } else {
@@ -70,7 +72,7 @@ function handleFiles(fileList) {
                 if (text.length > LIMIT) text = text.slice(0, LIMIT) + '\n...(이하 생략)';
                 evidenceTexts.push({ name: file.name, content: text });
                 renderEvidence();
-                if (--pending === 0) autoFill();
+                if (--pending === 0 && isAuto) autoFill();
             };
             reader.readAsText(file);
         }

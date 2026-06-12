@@ -43,12 +43,15 @@ public class JudgeService {
             [추가 맥락/증거]
             %s
 
+            [이 사연을 올린 사람]
+            %s
+
             첨부된 이미지가 있다면 그것도 중요한 증거다. 카카오톡 대화 캡처라면 누가 어떤 말을 했는지 읽고,
             사진이라면 상황을 파악해서 판결에 반영하라. 이미지 속 내용과 양측 주장이 다르면 그 점도 지적하라.
 
             위 내용을 바탕으로 판결하라.
             반드시 아래 JSON 형식으로만 답하라. 다른 설명, 인사말, 코드블록 표시(```)는 절대 붙이지 마라.
-            result, objectiveSummary, advice 의 내용은 모두 위에서 말한 군주의 말투로 작성하라.
+            result, objectiveSummary, advice, empathy 의 내용은 모두 위에서 말한 군주의 말투로 작성하라.
             단, 사람을 가리킬 때는 '(A)', '(B)' 같은 표기를 절대 쓰지 말고, 입력받은 실제 이름이나 '그대', '남자친구' 같은 자연스러운 호칭만 사용하라.
 
             {
@@ -56,7 +59,8 @@ public class JudgeService {
               "faultPercentA": A의 과실 비율 숫자(0~100),
               "faultPercentB": B의 과실 비율 숫자(0~100),
               "objectiveSummary": "한쪽 편 안 든, 제3자가 보는 객관적 상황 요약 2~4문장. 군주의 말투로.",
-              "advice": "두 사람의 관계 회복을 위한 현실적 조언 2~3문장. 군주의 말투로."
+              "advice": "두 사람의 관계 회복을 위한 현실적 조언 2~3문장. 군주의 말투로.",
+              "empathy": "위 '이 사연을 올린 사람'의 입장에서 그 마음을 헤아리고 다독이는 말. 판결은 객관적이었으나, 올린 사람의 답답함과 속상함에 공감해주는 따뜻한 말 2~3문장. 군주의 말투로. 올린 사람 정보가 없으면 빈 문자열."
             }
 
             주의: faultPercentA 와 faultPercentB 의 합은 반드시 100이어야 한다.
@@ -64,7 +68,8 @@ public class JudgeService {
                 request.title(),
                 request.personAName(), request.personAStory(),
                 request.personBName(), request.personBStory(),
-                request.context()
+                request.context(),
+                request.myName() == null ? "(밝히지 않음)" : request.myName()
         );
     }
 
@@ -80,7 +85,8 @@ public class JudgeService {
                     "판결을 정리하지 못했습니다.",
                     50, 50,
                     "AI 원본 응답: " + aiAnswer,
-                    "다시 시도해주세요."
+                    "다시 시도해주세요.",
+                    ""
             );
         }
     }

@@ -2,9 +2,10 @@ package com.aiweb.judge.dto;
 
 public record FromJudgeResponse (
         String result,
-        int faultPercentA,        // A의 과실 비율 (0~100)
-        int faultPercentB,        // B의 과실 비율 (0~100)
+        int faultPercentA,
+        int faultPercentB,
         String objectiveSummary,
-        String advice
+        String advice,
+        String empathy
 ) {
 }

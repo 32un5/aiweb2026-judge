@@ -9,7 +9,8 @@ public record CaseRequest(
         String personBName,
         String personBStory,
         String context,
-        List<EvidenceImage> images
+        List<EvidenceImage> images,
+        String myName
 ) {
 
     public record EvidenceImage(String mimeType, String data) {

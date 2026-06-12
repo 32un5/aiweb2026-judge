@@ -40,6 +40,15 @@
         </div>
     </div>
 
+    <div id="whoArea" class="single" style="display:none;">
+        <button class="back-btn" onclick="goHome()">← 처음으로</button>
+        <div class="col-title">그대는 누구인가?</div>
+        <div class="card" style="text-align:center;">
+            <p style="color:var(--muted); margin-bottom:1.2rem;">짐이 사연을 살폈노라.<br>이 사연을 올린 그대는 둘 중 누구인가?</p>
+            <div id="whoButtons" style="display:flex; flex-direction:column; gap:0.8rem;"></div>
+        </div>
+    </div>
+
     <div id="inputArea" class="single" style="display:none;">
         <button class="back-btn" onclick="goHome()">← 처음으로</button>
         <div class="col-title">사건을 아뢰어라</div>
@@ -89,6 +98,7 @@
             </div>
             <div class="card info-box"><div class="ic">🔍</div><div><h3>짐이 살피건대</h3><p id="summary"></p></div></div>
             <div class="card info-box"><div class="ic">💡</div><div><h3>짐의 명을 받들라</h3><p id="advice"></p></div></div>
+            <div class="card info-box" id="empathyCard"><div class="ic">💛</div><div><h3>그대의 마음을 헤아리니</h3><p id="empathy"></p></div></div>
         </div>
     </div>
 

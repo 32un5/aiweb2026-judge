@@ -2,6 +2,7 @@ const STORE_KEY = 'judge-history';
 
 let evidenceImages = [];
 let evidenceTexts = [];
+let myName = '';
 
 async function judge() {
     showLoading('짐이 헤아리는 중이니라...');
@@ -20,7 +21,8 @@ async function judge() {
         personBName: val('personBName'),
         personBStory: val('personBStory'),
         context: fullContext,
-        images: evidenceImages.map(img => ({ mimeType: img.mimeType, data: img.data }))
+        images: evidenceImages.map(img => ({ mimeType: img.mimeType, data: img.data })),
+        myName: myName || val('personAName')
     };
 
     try {
@@ -102,11 +104,30 @@ async function autoFill() {
         fillIfEmpty('personAStory', d.personAStory);
         fillIfEmpty('personBName', d.personBName);
         fillIfEmpty('personBStory', d.personBStory);
-        await judge();
+        hideLoading();
+        askWho(d.personAName, d.personBName);
     } catch (e) {
         hideLoading();
         alert('증좌를 살피지 못하였느니라 😢\n' + e);
     }
+}
+
+function askWho(nameA, nameB) {
+    const box = document.getElementById('whoButtons');
+    const a = (nameA && nameA.trim()) || val('personAName') || '첫째';
+    const b = (nameB && nameB.trim()) || val('personBName') || '둘째';
+    box.innerHTML = '';
+    [a, b].forEach(name => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.textContent = name;
+        btn.onclick = () => {
+            myName = name;
+            judge();
+        };
+        box.appendChild(btn);
+    });
+    showOnly('whoArea');
 }
 
 function fillIfEmpty(id, value) {
@@ -151,6 +172,15 @@ function showResult(payload, d) {
     document.getElementById('labelB').textContent = (payload.personBName || 'B') + ' ' + d.faultPercentB + '%';
     document.getElementById('summary').textContent = d.objectiveSummary;
     document.getElementById('advice').textContent = d.advice;
+    const empathyCard = document.getElementById('empathyCard');
+    if (empathyCard) {
+        if (d.empathy && d.empathy.trim() !== '') {
+            document.getElementById('empathy').textContent = d.empathy;
+            empathyCard.style.display = 'flex';
+        } else {
+            empathyCard.style.display = 'none';
+        }
+    }
     document.getElementById('result').classList.add('show');
     document.getElementById('barA').style.width = '0';
     document.getElementById('barB').style.width = '0';
@@ -229,7 +259,7 @@ function escapeHtml(s) {
 }
 
 function showOnly(id) {
-    ['chooseArea', 'evidenceArea', 'inputArea', 'resultArea', 'historyArea'].forEach(x => {
+    ['chooseArea', 'evidenceArea', 'whoArea', 'inputArea', 'resultArea', 'historyArea'].forEach(x => {
         const el = document.getElementById(x);
         if (!el) return;
         if (x === id) {
@@ -250,14 +280,16 @@ function goHome() {
         .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     evidenceImages = [];
     evidenceTexts = [];
+    myName = '';
     renderEvidence();
     showOnly('chooseArea');
 }
-function goManual()   { showOnly('inputArea'); }
-function goEvidence() { showOnly('evidenceArea'); }
 
-renderHistory();
-showOnly('chooseArea');
+function goManual() {
+    myName = '';
+    showOnly('inputArea');
+}
+function goEvidence() { showOnly('evidenceArea'); }
 
 function showLoading(msg) {
     const o = document.getElementById('loadingOverlay');
@@ -268,3 +300,6 @@ function showLoading(msg) {
 function hideLoading() {
     document.getElementById('loadingOverlay').classList.remove('show');
 }
+
+renderHistory();
+showOnly('chooseArea');

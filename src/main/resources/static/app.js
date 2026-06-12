@@ -125,7 +125,7 @@ function askWho(nameA, nameB) {
         btn.textContent = name;
         btn.onclick = () => {
             myName = name;
-            judge();
+            showOnly('inputArea');
         };
         box.appendChild(btn);
     });

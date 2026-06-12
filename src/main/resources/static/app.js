@@ -270,6 +270,16 @@ function showOnly(id) {
             el.style.display = 'none';
         }
     });
+
+    const header = document.querySelector('.header');
+    if (header) {
+        header.style.display = (id === 'chooseArea') ? 'block' : 'none';
+    }
+
+    const appContainer = document.querySelector('.app');
+    if (appContainer) {
+        appContainer.style.paddingTop = (id === 'chooseArea') ? '0' : '8rem';
+    }
 }
 
 function goHistory() {

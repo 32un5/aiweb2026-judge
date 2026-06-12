@@ -8,7 +8,12 @@ body {
 }
 .app { max-width: 1080px; margin: 0 auto; }
 
-.header { text-align: center; padding: 1.5rem 0 2rem; }
+
+.header {
+    text-align: center;
+    padding: 5rem 0 2rem;
+}
+
 .mascot { display: inline-block; animation: bob 3s ease-in-out infinite;
     filter: drop-shadow(0 0 16px rgba(201,162,39,0.5)); }
 @keyframes bob { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-8px) rotate(3deg); } }
@@ -229,4 +234,4 @@ textarea { min-height: 72px; resize: vertical; line-height: 1.7; }
     margin-right: 10px;
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
     animation: bob 3s ease-in-out infinite;
-} 
+}

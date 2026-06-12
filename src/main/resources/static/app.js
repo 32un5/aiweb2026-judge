@@ -21,14 +21,14 @@ async function judge() {
         personBName: val('personBName'),
         personBStory: val('personBStory'),
         context: fullContext,
-        images: evidenceImages.map(img => ({ mimeType: img.mimeType, data: img.data })),
+        images: evidenceImages.map(img => ({mimeType: img.mimeType, data: img.data})),
         myName: myName || val('personAName')
     };
 
     try {
         const res = await fetch('/api/judge', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(payload)
         });
         const d = await res.json();
@@ -58,7 +58,7 @@ function handleFiles(fileList, isAuto = false) {
             const reader = new FileReader();
             reader.onload = e => {
                 const base64 = e.target.result.split(',')[1];
-                evidenceImages.push({ name: file.name, mimeType: file.type, data: base64, preview: e.target.result });
+                evidenceImages.push({name: file.name, mimeType: file.type, data: base64, preview: e.target.result});
                 renderEvidence();
                 if (--pending === 0 && isAuto) autoFill();
             };
@@ -70,7 +70,7 @@ function handleFiles(fileList, isAuto = false) {
                 let text = e.target.result;
                 const LIMIT = 8000;
                 if (text.length > LIMIT) text = text.slice(0, LIMIT) + '\n...(이하 생략)';
-                evidenceTexts.push({ name: file.name, content: text });
+                evidenceTexts.push({name: file.name, content: text});
                 renderEvidence();
                 if (--pending === 0 && isAuto) autoFill();
             };
@@ -91,13 +91,13 @@ async function autoFill() {
     const chatText = evidenceTexts.map(t => `--- ${t.name} ---\n${t.content}`).join('\n\n');
     const payload = {
         context: chatText,
-        images: evidenceImages.map(img => ({ mimeType: img.mimeType, data: img.data }))
+        images: evidenceImages.map(img => ({mimeType: img.mimeType, data: img.data}))
     };
 
     try {
         const res = await fetch('/api/extract', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(payload)
         });
         const d = await res.json();
@@ -194,10 +194,10 @@ function showResult(payload, d) {
 
 function saveCase(payload, d) {
     const list = loadAll();
-    const lightPayload = { ...payload, images: [] };
+    const lightPayload = {...payload, images: []};
     list.unshift({
         id: Date.now(),
-        date: new Date().toLocaleString('ko-KR', { dateStyle: 'medium', timeStyle: 'short' }),
+        date: new Date().toLocaleString('ko-KR', {dateStyle: 'medium', timeStyle: 'short'}),
         payload: lightPayload,
         result: d
     });
@@ -210,8 +210,11 @@ function saveCase(payload, d) {
 }
 
 function loadAll() {
-    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
-    catch (e) { return []; }
+    try {
+        return JSON.parse(localStorage.getItem(STORE_KEY)) || [];
+    } catch (e) {
+        return [];
+    }
 }
 
 function renderHistory() {
@@ -239,7 +242,7 @@ function openCase(id) {
     const item = loadAll().find(x => x.id === id);
     if (!item) return;
     showResult(item.payload, item.result);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({top: 0, behavior: 'smooth'});
 }
 
 function delCase(id) {
@@ -254,10 +257,18 @@ function clearAll() {
     renderHistory();
 }
 
-function val(id) { return document.getElementById(id).value; }
+function val(id) {
+    return document.getElementById(id).value;
+}
 
 function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    return String(s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    }[c]));
 }
 
 function showOnly(id) {
@@ -288,8 +299,11 @@ function goHistory() {
 }
 
 function goHome() {
-    ['title','personAName','personAStory','personBName','personBStory','context']
-        .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    ['title', 'personAName', 'personAStory', 'personBName', 'personBStory', 'context']
+        .forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
     evidenceImages = [];
     evidenceTexts = [];
     myName = '';
@@ -301,7 +315,10 @@ function goManual() {
     myName = '';
     showOnly('inputArea');
 }
-function goEvidence() { showOnly('evidenceArea'); }
+
+function goEvidence() {
+    showOnly('evidenceArea');
+}
 
 function showLoading(msg) {
     const o = document.getElementById('loadingOverlay');
@@ -309,6 +326,7 @@ function showLoading(msg) {
     if (t && msg) t.textContent = msg;
     o.classList.add('show');
 }
+
 function hideLoading() {
     document.getElementById('loadingOverlay').classList.remove('show');
 }

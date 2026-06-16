@@ -12,7 +12,7 @@ public class GeminiClient {
     @Value("${GEMINI_API_KEY:}")
     private String apiKey;
 
-    @Value("${gemini.api.model:gemini-2.0-flash}")
+    @Value("${gemini.api.model:gemini-2.5-flash}")
     private String model;
 
     private final RestClient restClient = RestClient.create();

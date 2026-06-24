@@ -17,9 +17,20 @@ public class JudgeService {
     }
 
     public FromJudgeResponse judge(CaseRequest request) {
-        String prompt = buildPrompt(request);
-        String aiAnswer = geminiClient.ask(prompt, request.images());
-        return parseAnswer(aiAnswer);
+        if (isBlank(request.title()) || isBlank(request.personAName()) || isBlank(request.personAStory()) || isBlank(request.personBName()) || isBlank(request.personBStory())) {
+            return new FromJudgeResponse("사건 제목과 양측의 이름·입장을 모두 적어야 판결할 수 있느니라.", 50, 50, "", "", "");
+        }
+
+        try {
+            String prompt = buildPrompt(request);
+            String aiAnswer = geminiClient.ask(prompt, request.images());
+            return parseAnswer(aiAnswer);
+        } catch (org.springframework.web.client.HttpServerErrorException e) {
+            return new FromJudgeResponse("짐의 신하(AI)가 지금 분주하여 판결을 내리기 어렵노라. 잠시 후 다시 청하라. (서버 과부하 503)", 50, 50, "", "", ""
+            );
+        } catch (Exception e) {
+            return new FromJudgeResponse("지금은 판결을 내릴 수 없느니라. 잠시 후 다시 청하라.", 50, 50, "", "", "");
+        }
     }
 
     private String buildPrompt(CaseRequest request) {
@@ -92,9 +103,15 @@ public class JudgeService {
     }
 
     public AutoCaseResponse extract(String chatText, java.util.List<com.aiweb.judge.dto.CaseRequest.EvidenceImage> images) {
-        String prompt = buildExtractPrompt(chatText);
-        String aiAnswer = geminiClient.ask(prompt, images);
-        return parseExtract(aiAnswer);
+        try {
+            String prompt = buildExtractPrompt(chatText);
+            String aiAnswer = geminiClient.ask(prompt, images);
+            return parseExtract(aiAnswer);
+        } catch (org.springframework.web.client.HttpServerErrorException e) {
+            return new AutoCaseResponse("__ERROR__: 짐의 신하(AI)가 지금 분주하느니라. 잠시 후 다시 청하라. (서버 과부하 503)", "", "", "", "");
+        } catch (Exception e) {
+            return new AutoCaseResponse("__ERROR__: 증좌를 살피지 못하였느니라. 잠시 후 다시 시도하라.", "", "", "", "");
+        }
     }
 
     private String buildExtractPrompt(String chatText) {
@@ -130,6 +147,10 @@ public class JudgeService {
         } catch (Exception e) {
             return new AutoCaseResponse("", "", "", "", "");
         }
+    }
+
+    private boolean isBlank(String s) {
+        return s == null || s.isBlank();
     }
 
 }

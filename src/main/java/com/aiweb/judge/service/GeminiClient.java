@@ -35,14 +35,28 @@ public class GeminiClient {
                 }
         );
 
-        Map<?, ?> response = restClient.post()
-                .uri(url)
-                .header("Content-Type", "application/json")
-                .body(body)
-                .retrieve()
-                .body(Map.class);
+        final int MAX_ATTEMPTS = 3;
+        final long TIME_BUDGET_MS = 25000;
+        long start = System.currentTimeMillis();
+        org.springframework.web.client.HttpServerErrorException last = null;
 
-        return extractText(response);
+        for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+            try {
+                Map<?, ?> response = restClient.post().uri(url).header("Content-Type", "application/json").body(body).retrieve().body(Map.class);
+                return extractText(response);
+            } catch (org.springframework.web.client.HttpServerErrorException e) {
+                last = e;
+                long elapsed = System.currentTimeMillis() - start;
+                if (attempt == MAX_ATTEMPTS || elapsed > TIME_BUDGET_MS) break;
+                try {
+                    Thread.sleep(1500L * attempt);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }
+        throw last;
     }
 
     @SuppressWarnings("unchecked")

@@ -101,16 +101,22 @@ async function autoFill() {
             body: JSON.stringify(payload)
         });
         const d = await res.json();
+        hideLoading();
+
+        if (d.title && d.title.startsWith('__ERROR__')) {
+            alert(d.title.replace('__ERROR__:', '').trim());
+            return;
+        }
+
         fillIfEmpty('title', d.title);
         fillIfEmpty('personAName', d.personAName);
         fillIfEmpty('personAStory', d.personAStory);
         fillIfEmpty('personBName', d.personBName);
         fillIfEmpty('personBStory', d.personBStory);
-        hideLoading();
         askWho(d.personAName, d.personBName);
     } catch (e) {
         hideLoading();
-        alert('증좌를 살피지 못하였느니라 😢\n' + e);
+        alert('증좌를 살피지 못하였느니라 😢\n잠시 후 다시 시도하라.');
     }
 }
 
